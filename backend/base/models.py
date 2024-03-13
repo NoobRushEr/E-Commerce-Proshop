@@ -9,7 +9,7 @@ class Product(models.Model):
         null=True
     )
     name = models.CharField(max_length=256, null=True, blank=True)
-    # image = models.ImageField(upload_to='')
+    image = models.ImageField(blank=True, null=True)
     brand = models.CharField(max_length=256, null=True, blank=True)
     category = models.CharField(max_length=256, null=True, blank=True)
     description = models.TextField(max_length=1024, null=True, blank=True)
