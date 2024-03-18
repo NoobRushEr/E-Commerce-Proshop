@@ -5,7 +5,7 @@ from ..views import user_views as views
 
 urlpatterns = [
 
-    path('users/login/', TokenObtainPairView.as_view(serializer_class=views.MyTokenObtainPairSerializer), name='token_obtain_pair'),
+    path('login/', TokenObtainPairView.as_view(serializer_class=views.MyTokenObtainPairSerializer), name='token_obtain_pair'),
 
     path('register/', views.registerUser, name='register'),
 
