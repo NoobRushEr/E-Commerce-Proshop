@@ -29,7 +29,8 @@ export const CartScreen = () => {
     }
 
     const checkoutHandler = () => {
-        navigate('/login?redirect=shipping')
+        const redirectPath = searchParams.get('redirect') || '/shipping';
+        navigate(redirectPath);
     }
 
     return (
