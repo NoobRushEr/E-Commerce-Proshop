@@ -7,7 +7,6 @@ import axios from "axios";
 
 function ProductScreen() {
     const { id } = useParams()
-    // const product = products.find((p) => p._id === id)
 
     const [product,setProduct] = useState([])
 
