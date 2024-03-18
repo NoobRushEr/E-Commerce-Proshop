@@ -1,29 +1,32 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
 import { Link, useParams } from 'react-router-dom'
 import { Row, Col, Image, ListGroup, Button, Card } from 'react-bootstrap'
 import Rating from "../components/Rating";
+import {Loader} from "../components/Loader";
+import {Message} from "../components/Message";
+import {listproductDetails} from "../actions/productActions";
 
-import axios from "axios";
 
 function ProductScreen() {
     const { id } = useParams()
 
-    const [product,setProduct] = useState([])
+    const dispatch = useDispatch()
+    const productDetails = useSelector(state => state.productDetails)
+    const { loading, error, product } = productDetails
 
     useEffect(() => {
-        async function fetchProduct() {
-
-            const { data } = await axios.get(`/api/products/${id}`)
-            setProduct(data)
-        }
-
-        fetchProduct()
-
-    }, [id])
+        dispatch(listproductDetails(id))
+    }, [dispatch, id])
 
     return (
         <div>
             <Link to='/' className='btn btn-light my-3'>Go Back</Link>
+            { loading ?
+                <Loader />
+                : error
+                    ? <Message>{error}</Message>
+                    :(
             <Row>
                 <Col md={6}>
                     <Image src={product.image} />
@@ -34,7 +37,7 @@ function ProductScreen() {
                             <h3>{product.name}</h3>
                         </ListGroup.Item>
                         <ListGroup.Item>
-                            <Rating value={product.rating} text={`${product.numReviews} reviews`} color={'#f8e825'} />
+                            <Rating value={Number(product.rating)} text={`${product.numReviews} reviews`} color={'#f8e825'} />
                         </ListGroup.Item>
                         <ListGroup.Item>
                             Price: ₹{product.price}
@@ -81,6 +84,8 @@ function ProductScreen() {
                     </Card>
                 </Col>
             </Row>
+                    )
+            }
         </div>
     )
 }
