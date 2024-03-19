@@ -11,12 +11,12 @@ import {
 
 export const listproducts = () => async (dispatch) => {
     try {
-        console.log("Dispatching PRODUCT_LIST_REQUEST");
+
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
         const { data } = await axios.get(`/api/products`);
 
-        console.log("Dispatching PRODUCT_LIST_SUCCESS with data:", data);
+
         dispatch({
             type: PRODUCT_LIST_SUCCESS,
             payload: data,
@@ -36,12 +36,12 @@ export const listproducts = () => async (dispatch) => {
 
 export const listproductDetails = (id) => async (dispatch) => {
     try {
-        console.log("Dispatching PRODUCT_LIST_REQUEST");
+
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
         const { data } = await axios.get(`/api/products/${id}`);
 
-        console.log("Dispatching PRODUCT_LIST_SUCCESS with data:", data);
+
         dispatch({
             type: PRODUCT_DETAILS_SUCCESS,
             payload: data,

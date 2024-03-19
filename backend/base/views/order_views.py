@@ -61,6 +61,7 @@ def getOrderById(request, pk):
     user = request.user
 
     order = Order.objects.get(_id=pk)
+    print(order)
 
     try:
         if user.is_staff or order.user == user:
