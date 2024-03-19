@@ -7,16 +7,20 @@ import {Loader} from "../components/Loader.jsx";
 import {Message} from "../components/Message.jsx";
 import { listproducts, deleteProduct, createProduct} from "../actions/productActions.jsx";
 import {PRODUCT_CREATE_RESET} from "../constants/productConstants";
+import {Paginate} from "../components/Paginate";
 
 export const ProductListScreen = () => {
 
 
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const keyword = searchParams.get('keyword')
+    const pg = searchParams.get("page") || 1;
 
     const dispatch = useDispatch()
 
     const productList = useSelector(state => state.productList)
-    const { loading, error, products } = productList
+    const { loading, error, products, page, pages } = productList
 
     const productDelete = useSelector(state => state.productDelete)
     const { loading:loadingDelete, error:errorDelete, success:successDelete } = productDelete
@@ -37,9 +41,9 @@ export const ProductListScreen = () => {
             navigate(`/admin/product/${createdProduct._id}/edit`)
         }
         else{
-            dispatch(listproducts())
+            dispatch(listproducts(keyword, pg))
         }
-    }, [dispatch, navigate, userInfo, successDelete, successCreate, createdProduct]);
+    }, [dispatch, navigate, userInfo, successDelete, successCreate, createdProduct, keyword, pg]);
 
     const deleteHandler = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')){
@@ -77,6 +81,7 @@ export const ProductListScreen = () => {
             : error
                 ? (<Message variant={'danger'}>{error}</Message>)
                 : (
+                    <div>
                     <Table striped bordered hover responsive className={'table-sm'}>
                         <thead>
                             <tr>
@@ -112,6 +117,8 @@ export const ProductListScreen = () => {
                         ))}
                         </tbody>
                     </Table>
+                        <Paginate page={page} pages={pages} isAdmin={true} />
+                    </div>
                     )}
         </div>
     )

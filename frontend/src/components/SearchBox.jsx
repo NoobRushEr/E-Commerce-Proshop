@@ -3,13 +3,15 @@ import { Button, Form } from "react-bootstrap";
 import {useNavigate, useSearchParams} from "react-router-dom";
 export const SearchBox = () => {
 
-    const [keyword, setKeyWord] = useState('')
-    const navigate = useNavigate()
-    const path = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("keyword") || "");
+
     const submitHandler = (e) => {
         e.preventDefault()
-        if(keyword){
-            navigate(`/?keyword=${keyword}`)
+        setSearchParams({ keyword: searchQuery });
+        if(searchQuery){
+            navigate(`/?keyword=${encodeURIComponent(searchQuery)}&page=1`);
         }else {
             navigate(navigate(window.location.pathname, {replace: true}))
         }
@@ -24,7 +26,7 @@ export const SearchBox = () => {
             <Form.Control
                 type={'text'}
                 name={'q'}
-                onChange={(e) => setKeyWord(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className={'mr-sm-2 ml-sm-5'}
             ></Form.Control>
 
