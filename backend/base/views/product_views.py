@@ -95,12 +95,12 @@ def createProductView(request, pk):
     ).exists()
 
     if alreadyExists:
-        content = {'details': 'Product already Reviewed'}
+        content = {'detail': 'Product already Reviewed'}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     # 2.No Rating or 0
     elif data['rating'] == 0:
-        content = {'details': 'Please select a rating'}
+        content = {'detail': 'Please select a rating'}
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
     # 3.Create Review
