@@ -3,20 +3,23 @@ import { Row, Col } from 'react-bootstrap'
 import {useDispatch, useSelector} from "react-redux";
 import {listproducts} from "../actions/productActions";
 import Product from "../components/Product";
-
+import {useSearchParams} from "react-router-dom";
 import {Loader} from "../components/Loader";
 import {Message} from "../components/Message";
 
 
 function HomeScreen() {
 
+    const [searchParams] = useSearchParams()
+    const keyword = searchParams.get('keyword')
+
     const dispatch = useDispatch()
     const productList = useSelector(state => state.productList)
     const {error, loading, products} = productList
 
     useEffect(() => {
-        dispatch(listproducts())
-    }, [dispatch])
+        dispatch(listproducts(keyword))
+    }, [dispatch, keyword])
 
     return (
         <div>
