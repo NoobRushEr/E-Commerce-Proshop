@@ -12,6 +12,8 @@ urlpatterns = [
 
     path('<str:pk>/reviews/', views.createProductView, name='create-review'),
 
+    path('top/', views.getTopProducts, name='top-products'),
+
     path('<str:pk>/', views.getProduct, name='product'),
 
     path('update/<str:pk>/', views.updateProduct, name='product-update'),
