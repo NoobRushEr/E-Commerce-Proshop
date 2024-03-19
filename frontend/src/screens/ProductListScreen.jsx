@@ -5,8 +5,8 @@ import { Table, Button, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import {Loader} from "../components/Loader.jsx";
 import {Message} from "../components/Message.jsx";
-import { listproducts, deleteProduct } from "../actions/productActions.jsx";
-import product from "../components/Product.jsx";
+import { listproducts, deleteProduct, createProduct} from "../actions/productActions.jsx";
+import {PRODUCT_CREATE_RESET} from "../constants/productConstants";
 
 export const ProductListScreen = () => {
 
@@ -21,18 +21,25 @@ export const ProductListScreen = () => {
     const productDelete = useSelector(state => state.productDelete)
     const { loading:loadingDelete, error:errorDelete, success:successDelete } = productDelete
 
+    const productCreate = useSelector(state => state.productCreate)
+    const { loading:loadingCreate, error:errorCreate, success:successCreate, product:createdProduct } = productCreate
+
     const userLogin = useSelector(state => state.userLogin)
     const { userInfo } = userLogin
 
 
     useEffect(() => {
-        if(userInfo && userInfo.isAdmin){
-        dispatch(listproducts())
-        }
-        else{
+        dispatch({type: PRODUCT_CREATE_RESET})
+        if(!userInfo.isAdmin){
             navigate(`/login`)
         }
-    }, [dispatch, navigate, userInfo, successDelete]);
+        if(successCreate){
+            navigate(`/admin/product/${createdProduct._id}/edit`)
+        }
+        else{
+            dispatch(listproducts())
+        }
+    }, [dispatch, navigate, userInfo, successDelete, successCreate, createdProduct]);
 
     const deleteHandler = (id) => {
         if (window.confirm('Are you sure you want to delete this product?')){
@@ -41,7 +48,7 @@ export const ProductListScreen = () => {
     }
 
     const createProductHandler = (product) => {
-        //create product
+        dispatch(createProduct())
     }
 
     return (
@@ -61,6 +68,9 @@ export const ProductListScreen = () => {
 
             {loadingDelete && <Loader/>}
             {errorDelete && <Message variant={'danger'}>{errorDelete}</Message>}
+
+            {loadingCreate && <Loader/>}
+            {errorCreate && <Message variant={'danger'}>{errorCreate}</Message>}
 
             {loading
             ? <Loader/>

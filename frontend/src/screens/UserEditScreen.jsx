@@ -39,7 +39,7 @@ export const UserEditScreen = () => {
             }
         }
 
-    },[id, user, navigate])
+    },[id, user, navigate, successUpdate])
 
     const submitHandler = (e) => {
         e.preventDefault()
