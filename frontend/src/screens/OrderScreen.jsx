@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, ListGroup, Image, Card } from "react-bootstrap";
 import {Link, useParams} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {Message} from "../components/Message.jsx";
 import {Loader} from "../components/Loader.jsx";
-import { getOrderDetails } from "../actions/orderActions.jsx";
+import { getOrderDetails, payOrder } from "../actions/orderActions.jsx";
+import {PayPalButtons, PayPalScriptProvider} from "@paypal/react-paypal-js";
+import {ORDER_PAY_RESET} from "../constants/orderConstants";
 
 export const OrderScreen = () => {
 
@@ -12,8 +14,13 @@ export const OrderScreen = () => {
 
     const dispatch = useDispatch()
 
+    const [sdkReady, setSdkReady] = useState(false)
+
     const orderDetails = useSelector(state => state.orderDetails)
     const {order, error, loading} = orderDetails
+
+    const orderPay = useSelector(state => state.orderPay)
+    const {loading:loadingPay, success:succesPay} = orderPay
 
     if(!loading && !error){
         order.itemsPrice = order.orderItems.reduce((acc, item) => acc + item.price * item.qty, 0).toFixed(2)
@@ -21,10 +28,34 @@ export const OrderScreen = () => {
 
 
     useEffect(() => {
-        if(!order || order._id !== Number(id)){
+        if(!order || succesPay || order._id !== Number(id)){
+            dispatch({type:ORDER_PAY_RESET})
             dispatch(getOrderDetails(id))
+        }else if(!order.isPaid){
+            if(!window.paypal){
+                addPayPalScript()
+            }else{
+                setSdkReady(true)
+            }
         }
-    }, [order, id, dispatch])
+    }, [order, id, dispatch, succesPay])
+
+
+    const addPayPalScript = () => {
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = 'https://www.paypal.com/sdk/js?client-id=AWkBN-vhX1XAkkvQD9WjFPeGRiP_igsNieaAeuxevcxdMx_N_CF4LCURCguGqwIyNVdafYOQ4Nc3KfbW'
+        script.async = true
+        script.onload = () =>{
+            setSdkReady(true)
+        }
+        document.body.appendChild((script))
+
+    }
+
+    const successPaymentHandler = (paymentResult) =>{
+        dispatch(payOrder(id, paymentResult))
+    }
 
 
     return loading ? (
@@ -56,7 +87,7 @@ export const OrderScreen = () => {
                                 {order.shippingAddress.country}
                             </p>
                             {order.isDelivered ? (
-                                <Message variant={'success'}>Delivered On {order.deliveredAt}</Message>
+                                <Message variant={'success'}>Delivered On {order.deliveredAt.substring(0,10)}</Message>
                             ) : (
                                 <Message variant={'warning'}>Not Delivered</Message>
                             )}
@@ -72,7 +103,7 @@ export const OrderScreen = () => {
                                 {order.paymentMethod}
                             </p>
                             {order.isPaid ? (
-                                <Message variant={'success'}>Paid On {order.paidAt}</Message>
+                                <Message variant={'success'}>Paid On {order.paidAt.substring(0,10)}</Message>
                             ) : (
                                 <Message variant={'warning'}>Not Paid</Message>
                             )}
@@ -93,7 +124,7 @@ export const OrderScreen = () => {
                                                     <Link to={`/product/${item.product}`}>{item.name}</Link>
                                                 </Col>
                                                 <Col md={4}>
-                                                    {item.qty} X ${item.price} = {(item.qty * item.price).toFixed(2)}
+                                                    {item.qty} X ₹{item.price} = {(item.qty * item.price).toFixed(2)}
                                                 </Col>
                                             </Row>
                                         </ListGroup.Item>
@@ -115,29 +146,61 @@ export const OrderScreen = () => {
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Items:</Col>
-                                    <Col>${order.itemsPrice}</Col>
+                                    <Col>₹{order.itemsPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Shipping:</Col>
-                                    <Col>${order.shippingPrice}</Col>
+                                    <Col>₹{order.shippingPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Tax:</Col>
-                                    <Col>${order.taxPrice}</Col>
+                                    <Col>₹{order.taxPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
 
                             <ListGroup.Item>
                                 <Row>
                                     <Col>Total:</Col>
-                                    <Col>${order.totalPrice}</Col>
+                                    <Col>₹{order.totalPrice}</Col>
                                 </Row>
                             </ListGroup.Item>
+
+                            {!order.isPaid && (
+                                <ListGroup.Item>
+                                    {loadingPay && <Loader/>}
+
+                                    {!sdkReady ? (
+                                        <Loader/>
+                                    ) : (
+                                       <PayPalScriptProvider options={{
+                                           clientId: "AaWu8TQJS8RVDUq3lpkdNhrfCNp8ivNpfBkQ9jIKslHgExXe41R9Kcx9hx3TI3x4zYpZYhouYHd7mQJw",
+                                           components: "buttons",
+                                           currency: "USD" }}>
+                                            <PayPalButtons
+                                          style={{ layout: 'vertical' }}
+                                          createOrder={(data, actions) => {
+                                            return actions.order.create({
+                                              purchase_units: [
+                                                {
+                                                  amount: {
+                                                    value: order.totalPrice,
+                                                    currency_code: 'USD',
+                                                  },
+                                                },
+                                              ],
+                                            });
+                                          }}
+                                          onApprove={successPaymentHandler}
+                                        />
+                                       </PayPalScriptProvider>
+                                    )}
+                                </ListGroup.Item>
+                            )}
 
                         </ListGroup>
                     </Card>
