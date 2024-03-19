@@ -14,7 +14,7 @@ export const listproducts = () => async (dispatch) => {
 
         dispatch({ type: PRODUCT_LIST_REQUEST });
 
-        const { data } = await axios.get(`/api/products`);
+        const { data } = await axios.get(`/api/products/`);
 
 
         dispatch({
@@ -39,7 +39,7 @@ export const listproductDetails = (id) => async (dispatch) => {
 
         dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
-        const { data } = await axios.get(`/api/products/${id}`);
+        const { data } = await axios.get(`/api/products/${id}/`);
 
 
         dispatch({
